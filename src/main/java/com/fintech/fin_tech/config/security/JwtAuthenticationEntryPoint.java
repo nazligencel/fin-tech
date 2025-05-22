@@ -12,7 +12,7 @@ import java.io.IOException;
 import java.io.Serializable;
 
 /**
- * Kimlik doğrulama baaşrısız olduğunda(geçersiz token veya token yok) istemciye 401 Unauthorized hatası döndürür.
+ * Kimlik doğrulama başarısız olduğunda(geçersiz token veya token yok) istemciye 401 Unauthorized hatası döndürür.
  */
 @Component
 public class JwtAuthenticationEntryPoint implements AuthenticationEntryPoint, Serializable{
