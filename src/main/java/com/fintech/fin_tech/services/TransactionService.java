@@ -11,11 +11,11 @@ public interface TransactionService {
 
     Transaction addTransaction(Transaction transaction);
 
-    List<Transaction> getAllTransactions();
+    List<Transaction> getAllTransactionsForCurrentUser();
 
-    Optional<Transaction> getTransactionById(Long id);
+    Optional<Transaction> getTransactionByIdForCurrentUser(Long id);
 
-    Transaction updateTransaction(Long id, Transaction transactionDetails);
+    Transaction updateTransactionForCurrentUser(Long id, Transaction transactionDetails);
 
-    void deleteTransaction(Long id);
+    void deleteTransactionForCurrentUser(Long id);
 }

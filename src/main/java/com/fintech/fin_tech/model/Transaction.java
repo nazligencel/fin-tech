@@ -1,5 +1,6 @@
 package com.fintech.fin_tech.model;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fintech.fin_tech.util.CategoryType;
 import com.fintech.fin_tech.util.TransactionType;
 import jakarta.persistence.*;
@@ -10,13 +11,13 @@ import lombok.NoArgsConstructor;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 
-@Data// Getter, Setter, toString, equals, hashCode metodlarını otomatik oluşturur
-@NoArgsConstructor // Parametresiz constructor
+@Data
+@NoArgsConstructor
 @AllArgsConstructor
-@Entity // Bu sınıfın bir JPA entity'si olduğunu belirtir
+@Entity
 @Table(name = "transactions")
 public class Transaction {
-    @Id //  alanın primary key olduğunu belirtir
+    @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
@@ -36,4 +37,9 @@ public class Transaction {
 
     @Column(length = 255)
     private String description;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "user_id", nullable = false)
+    @JsonIgnore
+    private User user;
 }

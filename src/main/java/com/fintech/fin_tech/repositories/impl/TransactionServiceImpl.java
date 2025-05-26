@@ -1,8 +1,14 @@
 package com.fintech.fin_tech.repositories.impl;
 
+import com.fintech.fin_tech.config.security.CustomUserDetails;
 import com.fintech.fin_tech.model.Transaction;
+import com.fintech.fin_tech.model.User;
 import com.fintech.fin_tech.repositories.TransactionRepository;
+import com.fintech.fin_tech.repositories.UserRepository;
 import com.fintech.fin_tech.services.TransactionService;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -13,49 +19,66 @@ import java.util.Optional;
 public class TransactionServiceImpl implements TransactionService {
 
     private TransactionRepository transactionRepository;
+    private final UserRepository userRepository;
 
-    public TransactionServiceImpl(TransactionRepository transactionRepository) {
+    @Autowired
+    public TransactionServiceImpl(TransactionRepository transactionRepository, UserRepository userRepository) {
         this.transactionRepository = transactionRepository;
+        this.userRepository = userRepository;
     }
-    @Override
-    @Transactional // Veritabanı işlemlerinin transactional olmasını sağlar
-    public Transaction addTransaction(Transaction transaction) {
-        return transactionRepository.save(transaction);
-    }
-
-    @Override
-    @Transactional(readOnly = true)
-    public List<Transaction> getAllTransactions() {
-        return transactionRepository.findAll();
-    }
-
-    @Override
-    @Transactional(readOnly = true)
-    public Optional<Transaction> getTransactionById(Long id) {
-        return transactionRepository.findById(id);
+    private User getCurrentAuthenticatedUser() {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        if (authentication == null || !authentication.isAuthenticated() || authentication.getPrincipal().equals("anonymousUser")) {
+            throw new IllegalStateException("User not authenticated");
+        }
+        CustomUserDetails userDetails = (CustomUserDetails) authentication.getPrincipal();
+        return userRepository.findById(userDetails.getId())
+                .orElseThrow(() -> new RuntimeException("Authenticated user not found in database"));
     }
 
     @Override
     @Transactional
-    public Transaction updateTransaction(Long id, Transaction transactionDetails) {
-        // Önce güncellenecek transaction'ı bul
+    public Transaction addTransaction(Transaction transaction) {
+        User currentUser = getCurrentAuthenticatedUser();
+        transaction.setUser(currentUser);
+        return transactionRepository.save(transaction);
+    }
+
+    @Override
+    public List<Transaction> getAllTransactionsForCurrentUser() {
+        User currentUser = getCurrentAuthenticatedUser();
+        return transactionRepository.findByUserId(currentUser.getId());
+    }
+
+    @Override
+    public Optional<Transaction> getTransactionByIdForCurrentUser(Long id) {
+        User currentUser = getCurrentAuthenticatedUser();
+        return transactionRepository.findById(id) //önce id ile transaction bul sonra kullanıcısını kontrol et
+                .filter(transaction -> transaction.getUser().equals(currentUser));
+    }
+
+    @Override
+    public Transaction updateTransactionForCurrentUser(Long id, Transaction transactionDetails) {
+        User currentUser = getCurrentAuthenticatedUser();
         Transaction existingTransaction = transactionRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Transaction not found with id:" +id));
-        // Gelen transactionDetails ile mevcut transaction'ı güncelle
+                .filter(transaction -> transaction.getUser().getId().equals(currentUser.getId()))
+                .orElseThrow(() -> new RuntimeException("Transaction not found with id: " + id + " for current user"));
+
         existingTransaction.setType(transactionDetails.getType());
         existingTransaction.setAmount(transactionDetails.getAmount());
-        existingTransaction.setDescription(transactionDetails.getDescription());
         existingTransaction.setTransactionDate(transactionDetails.getTransactionDate());
-        existingTransaction.setCategory(existingTransaction.getCategory());
+        existingTransaction.setCategory(transactionDetails.getCategory());
+        existingTransaction.setDescription(transactionDetails.getDescription());
 
         return transactionRepository.save(existingTransaction);
     }
 
     @Override
-    public void deleteTransaction(Long id) {
-        if (!transactionRepository.existsById(id)) {
-            throw new RuntimeException("Transaction not found with id:" + id);
-        }
-        transactionRepository.deleteById(id);
+    public void deleteTransactionForCurrentUser(Long id) {
+        User currentUser = getCurrentAuthenticatedUser();
+        Transaction transactionDelete = transactionRepository.findById(id)
+                .filter(transaction -> transaction.getUser().getId().equals(currentUser.getId()))
+                .orElseThrow(() -> new RuntimeException("Transaction not found with id: " + id + " for current user for deletion."));
+        transactionRepository.delete(transactionDelete);
     }
 }
