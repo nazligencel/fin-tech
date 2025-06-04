@@ -9,10 +9,10 @@ public class WebConfig implements WebMvcConfigurer {
 
     @Override
     public void addCorsMappings(CorsRegistry registry) {
-        long MAX_AGE_SECS = 3600; // 1 saat
+        long MAX_AGE_SECS = 3600;
 
-        registry.addMapping("/api/**") // API endpoint'lerinizin başladığı yol (örn: /api/auth, /api/v1/transactions)
-                .allowedOrigins("http://localhost:5173") // Frontend'inizin çalıştığı tam adres ve port
+        registry.addMapping("/api/**") // API endpoint'lerinizin başladığı yol (örn: /api/auth, /api/transactions)
+                .allowedOrigins("http://localhost:5173") // Frontendin çalıştığı tam adres ve port
                 .allowedMethods("GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS") // İzin verilen HTTP metotları
                 .allowedHeaders("*") // Tüm header'lara izin ver
                 .allowCredentials(true) // Kimlik bilgisi içeren isteklere (JWT token) izin ver
