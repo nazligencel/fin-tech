@@ -1,17 +1,21 @@
 package com.fintech.fin_tech.repositories.impl;
 
 import com.fintech.fin_tech.config.security.CustomUserDetails;
+import com.fintech.fin_tech.dto.CategorySummaryDto;
+import com.fintech.fin_tech.dto.DashboardSummaryDto;
 import com.fintech.fin_tech.model.Transaction;
 import com.fintech.fin_tech.model.User;
 import com.fintech.fin_tech.repositories.TransactionRepository;
 import com.fintech.fin_tech.repositories.UserRepository;
 import com.fintech.fin_tech.services.TransactionService;
+import com.fintech.fin_tech.util.TransactionType;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.math.BigDecimal;
 import java.util.List;
 import java.util.Optional;
 
@@ -80,5 +84,38 @@ public class TransactionServiceImpl implements TransactionService {
                 .filter(transaction -> transaction.getUser().getId().equals(currentUser.getId()))
                 .orElseThrow(() -> new RuntimeException("Transaction not found with id: " + id + " for current user for deletion."));
         transactionRepository.delete(transactionDelete);
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public DashboardSummaryDto getDashboardSummaryForCurrentUser(Integer year, Integer month) {
+        User currentUser = getCurrentAuthenticatedUser();
+        Long userId = currentUser.getId();
+
+        BigDecimal totalIncome;
+        BigDecimal totalExpense;
+
+        if(year != null && month != null){
+            totalIncome = transactionRepository.sumAmountByUserIdAndTypeAndYearAndMonth(userId, TransactionType.INCOME, year, month);
+            totalExpense = transactionRepository.sumAmountByUserIdAndTypeAndYearAndMonth(userId, TransactionType.EXPENSE, year, month);
+        }else {
+            totalIncome = transactionRepository.sumAmountByUserIdAndType(userId, TransactionType.INCOME);
+            totalExpense = transactionRepository.sumAmountByUserIdAndType(userId, TransactionType.EXPENSE);
+        }
+
+        BigDecimal balance = totalIncome.subtract(totalExpense);
+        return new DashboardSummaryDto(totalIncome, totalExpense, balance);
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public List<CategorySummaryDto> getExpenseSummaryByCategoryForCurrentUser(Integer year, Integer month) {
+        User currentUser = getCurrentAuthenticatedUser();
+        Long userId = currentUser.getId();
+        if (year != null && month != null) {
+            return transactionRepository.findExpenseSumByCategoryAndYearAndMonthForUser(userId, year, month);
+        } else {
+            return transactionRepository.findExpenseSumByCategoryForUser(userId);
+        }
     }
 }
