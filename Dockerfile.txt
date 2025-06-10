@@ -1,29 +1,10 @@
-# Kullanılacak base Java imajı
-FROM eclipse-temurin:17-jdk-jammy # Kullandığınız Java sürümüne göre güncelleyin
+FROM openjdk:17-jdk-slim
 
 WORKDIR /app
+COPY . .
 
-# Maven için
-COPY .mvn/ .mvn
-COPY mvnw .
-COPY pom.xml .
-RUN ./mvnw dependency:go-offline -B
+RUN chmod +x ./mvnw
+RUN ./mvnw clean package -DskipTests
 
-# Gradle için (EĞER GRADLE KULLANIYORSANIZ BUNLARI KULLANIN, MAVEN KISMINI SİLİN)
-# COPY build.gradle settings.gradle gradlew ./
-# COPY gradle ./gradle
-# RUN ./gradlew dependencies --build-cache || return 0 # Bağımlılıkları önbelleğe al
-
-COPY src ./src
-
-# Maven için
-RUN ./mvnw package -DskipTests
-
-# Gradle için
-# RUN ./gradlew bootJar -x test # Testleri atlayarak JAR oluştur
-
-# Oluşan JAR dosyasının adı ve yolu projenize göre değişebilir.
-# target/ genellikle Maven, build/libs/ genellikle Gradle içindir.
-# JAR dosyasının adını pom.xml veya build.gradle dosyanızdan kontrol edin.
-ENTRYPOINT ["java", "-jar", "-Dserver.port=${PORT}", "target/fin-tech-0.0.1-SNAPSHOT.jar"]
-# Gradle kullanıyorsanız: "build/libs/fin-tech-0.0.1-SNAPSHOT.jar" gibi olabilir
+EXPOSE 8080
+CMD ["java", "-jar", "target/*.jar"]
