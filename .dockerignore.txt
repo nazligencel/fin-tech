@@ -1,0 +1,13 @@
+.git
+.gitignore
+.idea/
+*.iml
+target/
+build/
+.mvn/
+mvnw
+mvnw.cmd
+gradle/
+gradlew
+gradlew.bat
+# Eklemek istediğiniz diğer gereksiz dosyalar veya klasörler
