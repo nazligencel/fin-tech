@@ -16,6 +16,6 @@ public class WebConfig implements WebMvcConfigurer {
                 .allowedMethods("GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS") // İzin verilen HTTP metotları
                 .allowedHeaders("*") // Tüm header'lara izin ver
                 .allowCredentials(true) // Kimlik bilgisi içeren isteklere (JWT token) izin ver
-                .maxAge(MAX_AGE_SECS); // Preflight (OPTIONS) isteğinin ne kadar süreyle cache'leneceği
+                .maxAge(3600); // Preflight (OPTIONS) isteğinin ne kadar süreyle cache'leneceği
     }
 }
