@@ -1,0 +1,18 @@
+# Database
+MYSQL_USERNAME: root
+MYSQL_PASSWORD: 1234
+MYSQL_HOST: mysql-db-container
+MYSQL_PORT: 3306
+MYSQL_DATABASE: fintech
+
+# Server
+CONTAINER_PORT: 8082
+ACTIVE_PROFILE: prod
+
+# Verify
+VERIFY_HOST: http://localhost:${CONTAINER_PORT}
+
+# UI
+UI_APP_URL: http://localhost:5173
+
+JWT_SECRET: eU7Gvpt6X2P9fEJvV+0wz1oRj9tcgQ5BdMniA8xYgls=
