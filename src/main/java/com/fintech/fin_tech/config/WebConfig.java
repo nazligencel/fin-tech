@@ -11,11 +11,12 @@ public class WebConfig implements WebMvcConfigurer {
     public void addCorsMappings(CorsRegistry registry) {
         long MAX_AGE_SECS = 3600;
 
-        registry.addMapping("/api/**") // API endpoint'lerinizin başladığı yol (örn: /api/auth, /api/transactions)
-                .allowedOrigins("http://localhost:5173") // Frontendin çalıştığı tam adres ve port
-                .allowedMethods("GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS") // İzin verilen HTTP metotları
-                .allowedHeaders("*") // Tüm header'lara izin ver
+        registry.addMapping("/api/**")
+                .allowedOrigins("http://localhost:5173")
+                .allowedOrigins("https://fin-tech-production.up.railway.app","http://localhost")
+                .allowedMethods("GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS")
+                .allowedHeaders("*")
                 .allowCredentials(true) // Kimlik bilgisi içeren isteklere (JWT token) izin ver
-                .maxAge(3600); // Preflight (OPTIONS) isteğinin ne kadar süreyle cache'leneceği
+                .maxAge(3600); //  ne kadar süreyle cache'leneceği
     }
 }
