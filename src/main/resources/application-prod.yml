@@ -4,9 +4,6 @@ spring:
     username: root
     password: ToZIiCRrZaDYNANBXQbOpoUIJQscsbCr
 
-  profiles:
-    active: prod
-
 server:
   port: 8080
 
