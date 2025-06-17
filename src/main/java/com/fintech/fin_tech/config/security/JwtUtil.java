@@ -17,13 +17,14 @@ import java.util.function.Function;
 
 @Component
 public class JwtUtil {
-    @Value("${app.jwt.secret}")
-    private String jwtSecret;
 
-    @Value("${app.jwt.access-token-expiration-ms}")
-    private long accessTokenExpirationMs;
+    private final JwtConfig jwtConfig;
 
-    // JWT'den kullanıcı adını (subject) çıkarır
+    public JwtUtil(JwtConfig jwtConfig) {
+        this.jwtConfig = jwtConfig;
+    }
+
+    // JWT'den kullanıcı adını  çıkarır
     public String extractUsername(String token) {
         return extractClaim(token, Claims::getSubject);
     }
@@ -33,12 +34,10 @@ public class JwtUtil {
         return extractClaim(token, Claims::getExpiration);
     }
 
-    // JWT'den belirli bir claim'i (iddia) çıkarır
     public <T> T extractClaim(String token, Function<Claims, T> claimsResolver) {
         final Claims claims = extractAllClaims(token);
         return claimsResolver.apply(claims);
     }
-
     // JWT'den tüm claim'leri çıkarır
     private Claims extractAllClaims(String token) {
         return Jwts.parserBuilder()
@@ -50,7 +49,7 @@ public class JwtUtil {
 
     // İmzalama için kullanılacak gizli anahtarı alır
     private Key getSigningKey() {
-        byte[] keyBytes = Decoders.BASE64.decode(jwtSecret);
+        byte[] keyBytes = Decoders.BASE64.decode(jwtConfig.jwtSecret());
         return Keys.hmacShaKeyFor(keyBytes);
     }
 
@@ -62,7 +61,7 @@ public class JwtUtil {
     // UserDetails nesnesinden access token üretir
     public String generateAccessToken(UserDetails userDetails) {
         Map<String, Object> claims = new HashMap<>();
-        return createToken(claims, userDetails.getUsername(), accessTokenExpirationMs);
+        return createToken(claims, userDetails.getUsername(), Long.parseLong(String.valueOf(jwtConfig.expiration())));
     }
 
     // Belirli claim'ler, kullanıcı adı ve geçerlilik süresi ile token oluşturur
