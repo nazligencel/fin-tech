@@ -13,7 +13,7 @@ public class WebConfig implements WebMvcConfigurer {
 
         registry.addMapping("/api/**")
                 .allowedOrigins("http://localhost:5173")
-                .allowedOrigins("https://fin-tech-production.up.railway.app","http://localhost")
+                //.allowedOrigins("https://fin-tech-production.up.railway.app","http://localhost")
                 .allowedMethods("GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS")
                 .allowedHeaders("*")
                 .allowCredentials(true) // Kimlik bilgisi içeren isteklere (JWT token) izin ver

@@ -9,7 +9,7 @@ import java.time.Duration;
 @ConfigurationProperties(prefix = "app.jwt")
 public record JwtConfig(
         @NotBlank
-        String jwtSecret,
+        String secret,
         @NotNull
         Duration expiration) {
 }

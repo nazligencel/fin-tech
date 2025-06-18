@@ -49,7 +49,7 @@ public class JwtUtil {
 
     // İmzalama için kullanılacak gizli anahtarı alır
     private Key getSigningKey() {
-        byte[] keyBytes = Decoders.BASE64.decode(jwtConfig.jwtSecret());
+        byte[] keyBytes = Decoders.BASE64.decode(jwtConfig.secret());
         return Keys.hmacShaKeyFor(keyBytes);
     }
 
@@ -61,7 +61,8 @@ public class JwtUtil {
     // UserDetails nesnesinden access token üretir
     public String generateAccessToken(UserDetails userDetails) {
         Map<String, Object> claims = new HashMap<>();
-        return createToken(claims, userDetails.getUsername(), Long.parseLong(String.valueOf(jwtConfig.expiration())));
+        long expirationTimeInMs = this.jwtConfig.expiration().toMillis();
+        return createToken(claims, userDetails.getUsername(), expirationTimeInMs);
     }
 
     // Belirli claim'ler, kullanıcı adı ve geçerlilik süresi ile token oluşturur
