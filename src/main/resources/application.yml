@@ -1,4 +1,6 @@
 spring:
+  application:
+    name: fin-tech
   profiles:
     active: dev
   datasource:
